@@ -1,0 +1,159 @@
+service: sso
+
+plugins:
+  - serverless-python-requirements
+  - serverless-stack-output
+
+custom:
+  output:
+    file: stack.yml
+  pythonRequirements:
+    dockerizePip: non-linux
+
+package:
+  individually: false
+  include:
+    - '!./**'
+    - './services/**'
+  exclude:
+    - '**'
+
+provider:
+  environment:
+    COGNITO_CLIENT_ID: !Ref cognitoUserPoolClient
+    COGNITO_KEYS_URL: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_UV1tqhg72/.well-known/jwks.json
+    COGNITO_USER_POOL: arn:aws:cognito-idp:us-east-1:419013314217:userpool/us-east-1_UV1tqhg72
+    COGNITO_USER_POOL_ID: us-east-1_UV1tqhg72
+    DYNAMODB_TABLE: !Ref dynamodbTable
+    SYSTEM_EMAIL: madsupport@softdevconsulting.com
+  name: aws
+  runtime: python3.8
+  stage: ${opt:stage, "dev"}
+
+functions:
+# triggers
+  authorizer:
+    handler: services/triggers/authorizer.auth
+    role: iamReadWriteRole
+  deploy:
+    handler: services/triggers/deploy.deploy
+    role: iamReadWriteRole
+  pre_authentication:
+    handler: services/triggers/pre_authentication.authorize_login
+    role: iamReadWriteRole
+  test_user_create:
+    handler: services/triggers/test_user.post
+    role: iamReadWriteRole
+  test_user_delete:
+    handler: services/triggers/test_user.delete
+    role: iamReadWriteRole
+# endpoints
+  application_get:
+    handler: services/endpoints/application.get
+    role: iamReadRole
+    events:
+      - http:
+          path: applications
+          method: get
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+      - http:
+          path: applications/{name}
+          method: get
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  application_patch:
+    handler: services/endpoints/application.patch
+    role: iamReadWriteRole
+    events:
+      - http:
+          path: applications/{name}
+          method: patch
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  application_post:
+    handler: services/endpoints/application.post
+    role: iamReadWriteRole
+    events:
+      - http:
+          path: applications
+          method: post
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  backend_user_get:
+    handler: services/endpoints/user.get
+    role: iamReadRole
+    events:
+      - http:
+          path: backend_users
+          method: get
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+      - http:
+          path: backend_users/{email}
+          method: get
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  backend_user_patch:
+    handler: services/endpoints/user.patch
+    role: iamReadWriteRole
+    events:
+      - http:
+          path: backend_users/{email}
+          method: patch
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  backend_user_post:
+    handler: services/endpoints/user.post
+    role: iamReadWriteRole
+    events:
+      - http:
+          path: backend_users
+          method: post
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  me:
+    handler: services/endpoints/public_user.me
+    role: iamReadRole
+    events:
+      - http:
+          path: me
+          method: get
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  public_user_get:
+    handler: services/endpoints/public_user.get
+    role: iamReadRole
+    events:
+      - http:
+          path: user
+          method: get
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+      - http:
+          path: user/{email}
+          method: get
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  public_user_patch:
+    handler: services/endpoints/public_user.patch
+    role: iamReadWriteRole
+    events:
+      - http:
+          path: user/{email}
+          method: patch
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+  public_user_post:
+    handler: services/endpoints/public_user.post
+    role: iamReadWriteRole
+    events:
+      - http:
+          path: user
+          method: post
+          cors: true
+          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+
+resources:
+  - ${file(serverless-iam.yml)}
+  - ${file(serverless-resources.yml)}

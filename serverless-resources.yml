@@ -1,0 +1,178 @@
+Resources:
+  cognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+        InviteMessageTemplate:
+          EmailMessage: "Your username is {username} and temporary password is {####}"
+          EmailSubject: "Welcome to SoftDev SSO system!"
+          SMSMessage: "Welcome to SoftDev's SSO system! Your username is {username} and temporary password is {####}"
+      AutoVerifiedAttributes:
+        - email
+      EmailVerificationMessage: "Your verification code is {####}"
+      LambdaConfig:
+        PreAuthentication: arn:aws:lambda:us-east-1:419013314217:function:${self:service}-${self:provider.stage}-pre_authentication
+      MfaConfiguration: OPTIONAL
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 7
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+        - Name: family_name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: given_name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: phone_number
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      SmsAuthenticationMessage: "Your authentication code is {####}"
+      SmsConfiguration:
+        ExternalId: ${self:service}-${self:provider.stage}-cognito-sms
+        SnsCallerArn: !GetAtt iamCognitoMfaRole.Arn
+      UsernameAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      UserPoolName: softdev
+
+  cognitoIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowClassicFlow: False
+      AllowUnauthenticatedIdentities: False
+      CognitoIdentityProviders:
+        - ClientId: !Ref cognitoUserPoolClient
+          ProviderName: { "Fn::Join": ["", ["cognito-idp.us-east-1.amazonaws.com/", {"Ref": "cognitoUserPool"}] ] }
+      IdentityPoolName: "${self:service}-${self:provider.stage} frontend identity pool"
+
+  cognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      AccessTokenValidity: 15
+      ClientName: ${self:service}-${self:provider.stage}-frontend-client
+      ExplicitAuthFlows:
+        - "ALLOW_ADMIN_USER_PASSWORD_AUTH"
+        - "ALLOW_REFRESH_TOKEN_AUTH"
+        - "ALLOW_USER_SRP_AUTH"
+      GenerateSecret: false
+      IdTokenValidity: 15
+      PreventUserExistenceErrors: "ENABLED"
+      RefreshTokenValidity: 10
+      TokenValidityUnits:
+        AccessToken: "minutes"
+        IdToken: "minutes"
+        RefreshToken: "hours"
+      UserPoolId: !Ref cognitoUserPool
+
+  cognitoIdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref cognitoIdentityPool
+      Roles:
+        "authenticated": !GetAtt iamCognitoAuthRole.Arn
+        "unauthenticated": !GetAtt iamCognitoUnauthRole.Arn
+
+  dynamodbTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: resourceId
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: resourceId
+          AttributeType: S
+        - AttributeName: resourceType
+          AttributeType: S
+        - AttributeName: cognitoClientId
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+        - AttributeName: name
+          AttributeType: S
+        - AttributeName: application
+          AttributeType: S
+      GlobalSecondaryIndexes:
+        - IndexName: cognitoClientId-index
+          KeySchema:
+            - AttributeName: cognitoClientId
+              KeyType: HASH
+            - AttributeName: email
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: resourceType-index
+          KeySchema:
+            - AttributeName: resourceType
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: resourceName-index
+          KeySchema:
+            - AttributeName: resourceType
+              KeyType: HASH
+            - AttributeName: name
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: applicationEnvironments-index
+          KeySchema:
+            - AttributeName: resourceType
+              KeyType: HASH
+            - AttributeName: application
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  s3FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:service}-${self:provider.stage}-frontend
+      LoggingConfiguration:
+        DestinationBucketName: !Ref s3FrontendAccessLogsBucket
+        LogFilePrefix: ${self:service}-access-logs
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+  s3FrontendAccessLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketName: ${self:service}-${self:provider.stage}-frontend-access-logs
+
+Outputs:
+  cognitoUserPoolId:
+    Value: !Ref cognitoUserPool
+    Description: Cognito User Pool Id
+  cognitoIdentityPoolId:
+    Value: !Ref cognitoIdentityPool
+    Description: Cognito Identity Pool Id
+  cognitoUserPoolClientId:
+    Value: !Ref cognitoUserPoolClient
+    Description: Cognito User Pool App Client Id
+  dynamodbTableName:
+    Value: !Ref dynamodbTable
+    Description: DynamoDB Table
+  s3FrontendBucketWebsiteURL:
+    Value: !GetAtt [ s3FrontendBucket, WebsiteURL ]
+    Description: URL for the frontend website hosted on S3
+  s3FrontendAccessLogsBucketName:
+    Value: !Ref s3FrontendAccessLogsBucket
+    Description: Frontend access logs bucket name
