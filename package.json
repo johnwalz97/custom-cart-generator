@@ -1,11 +1,11 @@
 {
-  "name": "svelte-app",
-  "version": "1.0.0",
+  "name": "custom_cart_generator",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public"
+    "deploy": "./deploy.sh",
+    "dev": "rollup -c -w"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
@@ -16,10 +16,9 @@
     "rollup-plugin-svelte": "^7.0.0",
     "rollup-plugin-terser": "^7.0.0",
     "serverless": "^2.30.3",
+    "serverless-python-requirements": "^5.1.0",
+    "serverless-stack-output": "^0.2.3",
     "svelte": "^3.0.0",
     "sveltestrap": "^3.13.0"
-  },
-  "dependencies": {
-    "sirv-cli": "^1.0.0"
   }
 }

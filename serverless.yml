@@ -1,4 +1,4 @@
-service: sso
+service: ccg
 
 plugins:
   - serverless-python-requirements
@@ -13,147 +13,101 @@ custom:
 package:
   individually: false
   include:
-    - '!./**'
-    - './services/**'
+    - './backend/**'
   exclude:
     - '**'
 
 provider:
   environment:
-    COGNITO_CLIENT_ID: !Ref cognitoUserPoolClient
-    COGNITO_KEYS_URL: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_UV1tqhg72/.well-known/jwks.json
-    COGNITO_USER_POOL: arn:aws:cognito-idp:us-east-1:419013314217:userpool/us-east-1_UV1tqhg72
-    COGNITO_USER_POOL_ID: us-east-1_UV1tqhg72
+    APP_ENDPOINT: http://ccg-dev-frontend.s3-website-us-east-1.amazonaws.com
     DYNAMODB_TABLE: !Ref dynamodbTable
-    SYSTEM_EMAIL: madsupport@softdevconsulting.com
+    SHOPIFY_API_KEY: 5d9c7da289fe90dcde12d6cdc8cf3a45
+    SHOPIFY_API_SECRET: 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
+    SHOPIFY_API_VERSION: 2020-10
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:*
+      Resource: "*"
   name: aws
+  profile: personal
+  region: us-east-1
   runtime: python3.8
   stage: ${opt:stage, "dev"}
 
 functions:
-# triggers
-  authorizer:
-    handler: services/triggers/authorizer.auth
-    role: iamReadWriteRole
-  deploy:
-    handler: services/triggers/deploy.deploy
-    role: iamReadWriteRole
-  pre_authentication:
-    handler: services/triggers/pre_authentication.authorize_login
-    role: iamReadWriteRole
-  test_user_create:
-    handler: services/triggers/test_user.post
-    role: iamReadWriteRole
-  test_user_delete:
-    handler: services/triggers/test_user.delete
-    role: iamReadWriteRole
-# endpoints
-  application_get:
-    handler: services/endpoints/application.get
-    role: iamReadRole
+  install_app:
+    handler: backend/endpoints/install.install_app
     events:
-      - http:
-          path: applications
-          method: get
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-      - http:
-          path: applications/{name}
-          method: get
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  application_patch:
-    handler: services/endpoints/application.patch
-    role: iamReadWriteRole
+      - httpApi:
+          path: /install
+          method: GET
+  app_installed:
+    handler: backend/endpoints/install.app_installed
     events:
-      - http:
-          path: applications/{name}
-          method: patch
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  application_post:
-    handler: services/endpoints/application.post
-    role: iamReadWriteRole
+      - httpApi:
+          path: /app_installed
+          method: GET
+  app_uninstalled:
+    handler: backend/endpoints/install.app_uninstalled
     events:
-      - http:
-          path: applications
-          method: post
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  backend_user_get:
-    handler: services/endpoints/user.get
-    role: iamReadRole
-    events:
-      - http:
-          path: backend_users
-          method: get
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-      - http:
-          path: backend_users/{email}
-          method: get
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  backend_user_patch:
-    handler: services/endpoints/user.patch
-    role: iamReadWriteRole
-    events:
-      - http:
-          path: backend_users/{email}
-          method: patch
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  backend_user_post:
-    handler: services/endpoints/user.post
-    role: iamReadWriteRole
-    events:
-      - http:
-          path: backend_users
-          method: post
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  me:
-    handler: services/endpoints/public_user.me
-    role: iamReadRole
-    events:
-      - http:
-          path: me
-          method: get
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  public_user_get:
-    handler: services/endpoints/public_user.get
-    role: iamReadRole
-    events:
-      - http:
-          path: user
-          method: get
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-      - http:
-          path: user/{email}
-          method: get
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  public_user_patch:
-    handler: services/endpoints/public_user.patch
-    role: iamReadWriteRole
-    events:
-      - http:
-          path: user/{email}
-          method: patch
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
-  public_user_post:
-    handler: services/endpoints/public_user.post
-    role: iamReadWriteRole
-    events:
-      - http:
-          path: user
-          method: post
-          cors: true
-          authorizer: ${self:provider.environment.COGNITO_USER_POOL}
+      - httpApi:
+          path: /app_uninstalled
+          method: GET
+
+#  get_templates:
+#    handler: backend/endpoints/templates.get_templates
+#    role: iamReadRole
+#    events:
+#      - httpApi:
+#          path: /get_templates
+#          method: GET
+#  create_template:
+#    handler: backend/endpoints/templates.create_template
+#    role: iamReadRole
+#    events:
+#      - httpApi:
+#          path: /create_template
+#          method: POST
 
 resources:
-  - ${file(serverless-iam.yml)}
-  - ${file(serverless-resources.yml)}
+  Resources:
+    dynamodbTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: resource_id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: resource_id
+            AttributeType: S
+
+    s3FrontendBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: PublicRead
+        BucketName: ${self:service}-${self:provider.stage}-frontend
+        LoggingConfiguration:
+          DestinationBucketName: !Ref s3FrontendAccessLogsBucket
+          LogFilePrefix: ${self:service}-access-logs
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
+    s3FrontendAccessLogsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: LogDeliveryWrite
+        BucketName: ${self:service}-${self:provider.stage}-frontend-access-logs
+
+  Outputs:
+    dynamodbTableName:
+      Value: !Ref dynamodbTable
+      Description: DynamoDB Table`
+    s3FrontendBucketWebsiteURL:
+      Value: !GetAtt [ s3FrontendBucket, WebsiteURL ]
+      Description: URL for the frontend website hosted on S3
+    s3FrontendAccessLogsBucketName:
+      Value: !Ref s3FrontendAccessLogsBucket
+      Description: Frontend access logs bucket name

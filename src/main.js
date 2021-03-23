@@ -11,4 +11,6 @@ import App from './App.svelte';
 //   });
 // });
 
+// window.top.location.href = '{{ permission_url }}';
+
 export const app = new App({ target: document.body });
