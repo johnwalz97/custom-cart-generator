@@ -1,9 +1,9 @@
 s3FrontendAccessLogsBucketName: ccg-dev-frontend-access-logs
-AppUnderscoreuninstalledLambdaFunctionQualifiedArn: 'arn:aws:lambda:us-east-1:637649536396:function:ccg-dev-app_uninstalled:1'
+AppUnderscoreuninstalledLambdaFunctionQualifiedArn: 'arn:aws:lambda:us-east-1:637649536396:function:ccg-dev-app_uninstalled:4'
+GetUnderscorepermissionUnderscoreurlLambdaFunctionQualifiedArn: 'arn:aws:lambda:us-east-1:637649536396:function:ccg-dev-get_permission_url:3'
 s3FrontendBucketWebsiteURL: 'http://ccg-dev-frontend.s3-website-us-east-1.amazonaws.com'
-AppUnderscoreinstalledLambdaFunctionQualifiedArn: 'arn:aws:lambda:us-east-1:637649536396:function:ccg-dev-app_installed:1'
+AppUnderscoreinstalledLambdaFunctionQualifiedArn: 'arn:aws:lambda:us-east-1:637649536396:function:ccg-dev-app_installed:4'
 dynamodbTableName: ccg-dev-dynamodbTable-U6VI42O4FLND
-InstallUnderscoreappLambdaFunctionQualifiedArn: 'arn:aws:lambda:us-east-1:637649536396:function:ccg-dev-install_app:1'
 HttpApiId: 8bg2fa9sl6
 ServerlessDeploymentBucketName: ccg-dev-serverlessdeploymentbucket-oty3r6gohql9
 HttpApiUrl: 'https://8bg2fa9sl6.execute-api.us-east-1.amazonaws.com'

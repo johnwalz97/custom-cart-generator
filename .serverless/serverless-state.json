@@ -6,13 +6,16 @@
     },
     "provider": {
       "environment": {
-        "APP_ENDPOINT": "",
+        "APP_ENDPOINT": "http://ccg-dev-frontend.s3-website-us-east-1.amazonaws.com",
         "DYNAMODB_TABLE": {
           "Ref": "dynamodbTable"
         },
         "SHOPIFY_API_KEY": "5d9c7da289fe90dcde12d6cdc8cf3a45",
         "SHOPIFY_API_SECRET": "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",
         "SHOPIFY_API_VERSION": "2020-10"
+      },
+      "httpApi": {
+        "cors": true
       },
       "iamRoleStatements": [
         {
@@ -103,10 +106,10 @@
               }
             }
           },
-          "InstallUnderscoreappLogGroup": {
+          "GetUnderscorepermissionUnderscoreurlLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/ccg-dev-install_app"
+              "LogGroupName": "/aws/lambda/ccg-dev-get_permission_url"
             }
           },
           "AppUnderscoreinstalledLogGroup": {
@@ -201,23 +204,23 @@
               }
             }
           },
-          "InstallUnderscoreappLambdaFunction": {
+          "GetUnderscorepermissionUnderscoreurlLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/ccg/dev/1616468675753-2021-03-23T03:04:35.753Z/ccg.zip"
+                "S3Key": "serverless/ccg/dev/1616471084214-2021-03-23T03:44:44.214Z/ccg.zip"
               },
-              "Handler": "backend/endpoints/install.install_app",
+              "Handler": "backend/endpoints/install.get_permission_url",
               "Runtime": "python3.8",
-              "FunctionName": "ccg-dev-install_app",
+              "FunctionName": "ccg-dev-get_permission_url",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "APP_ENDPOINT": "",
+                  "APP_ENDPOINT": "http://ccg-dev-frontend.s3-website-us-east-1.amazonaws.com",
                   "DYNAMODB_TABLE": {
                     "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"DYNAMODB_TABLE\"]"
                   },
@@ -234,7 +237,7 @@
               }
             },
             "DependsOn": [
-              "InstallUnderscoreappLogGroup"
+              "GetUnderscorepermissionUnderscoreurlLogGroup"
             ]
           },
           "AppUnderscoreinstalledLambdaFunction": {
@@ -244,7 +247,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/ccg/dev/1616468675753-2021-03-23T03:04:35.753Z/ccg.zip"
+                "S3Key": "serverless/ccg/dev/1616471084214-2021-03-23T03:44:44.214Z/ccg.zip"
               },
               "Handler": "backend/endpoints/install.app_installed",
               "Runtime": "python3.8",
@@ -253,7 +256,7 @@
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "APP_ENDPOINT": "",
+                  "APP_ENDPOINT": "http://ccg-dev-frontend.s3-website-us-east-1.amazonaws.com",
                   "DYNAMODB_TABLE": {
                     "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"DYNAMODB_TABLE\"]"
                   },
@@ -280,7 +283,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/ccg/dev/1616468675753-2021-03-23T03:04:35.753Z/ccg.zip"
+                "S3Key": "serverless/ccg/dev/1616471084214-2021-03-23T03:44:44.214Z/ccg.zip"
               },
               "Handler": "backend/endpoints/install.app_uninstalled",
               "Runtime": "python3.8",
@@ -289,7 +292,7 @@
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "APP_ENDPOINT": "",
+                  "APP_ENDPOINT": "http://ccg-dev-frontend.s3-website-us-east-1.amazonaws.com",
                   "DYNAMODB_TABLE": {
                     "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"DYNAMODB_TABLE\"]"
                   },
@@ -309,41 +312,58 @@
               "AppUnderscoreuninstalledLogGroup"
             ]
           },
-          "AppUnderscoreinstalledLambdaVersionWwLJvei5xZLLtiqPUD3n8ePHVkcc9YrOZbwjPs": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "AppUnderscoreinstalledLambdaFunction"
-              },
-              "CodeSha256": "4lmisqE74Me8nSY16HpplvU74SoEJtc8yZLou1BadW0="
-            }
-          },
-          "AppUnderscoreuninstalledLambdaVersionZdZaBfKXAS0vwQPfJcf24c4aqwcl4Kss7K7ROELs7go": {
+          "AppUnderscoreuninstalledLambdaVersionTvVEugV3TWUVcwBvWPaaUVT0fVqgt8JerYGKpeRU": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AppUnderscoreuninstalledLambdaFunction"
               },
-              "CodeSha256": "4lmisqE74Me8nSY16HpplvU74SoEJtc8yZLou1BadW0="
+              "CodeSha256": "ksVFk0gQ1RYjoyqnoVTdS+Tpr/ufgGu/jssJFvadRjs="
             }
           },
-          "InstallUnderscoreappLambdaVersionVx9UvzdJ819b2MxlppKv495gZY9nQP2HNnr0hQPz8": {
+          "AppUnderscoreinstalledLambdaVersion5nhfMc9RDocaT8BmXIrmM53SpqnSEa1Xj7XQcUWLN5s": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "InstallUnderscoreappLambdaFunction"
+                "Ref": "AppUnderscoreinstalledLambdaFunction"
               },
-              "CodeSha256": "4lmisqE74Me8nSY16HpplvU74SoEJtc8yZLou1BadW0="
+              "CodeSha256": "ksVFk0gQ1RYjoyqnoVTdS+Tpr/ufgGu/jssJFvadRjs="
+            }
+          },
+          "GetUnderscorepermissionUnderscoreurlLambdaVersiongTwUzU5TeIlWKutxafu4Vhuaf3XttJuTs8xy40fSxRc": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetUnderscorepermissionUnderscoreurlLambdaFunction"
+              },
+              "CodeSha256": "ksVFk0gQ1RYjoyqnoVTdS+Tpr/ufgGu/jssJFvadRjs="
             }
           },
           "HttpApi": {
             "Type": "AWS::ApiGatewayV2::Api",
             "Properties": {
               "Name": "dev-ccg",
-              "ProtocolType": "HTTP"
+              "ProtocolType": "HTTP",
+              "CorsConfiguration": {
+                "AllowHeaders": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "AllowMethods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "AllowOrigins": [
+                  "*"
+                ]
+              }
             }
           },
           "HttpApiStage": {
@@ -359,12 +379,12 @@
               }
             }
           },
-          "InstallUnderscoreappLambdaPermissionHttpApi": {
+          "GetUnderscorepermissionUnderscoreurlLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "InstallUnderscoreappLambdaFunction",
+                  "GetUnderscorepermissionUnderscoreurlLambdaFunction",
                   "Arn"
                 ]
               },
@@ -396,7 +416,7 @@
               }
             }
           },
-          "HttpApiIntegrationInstallUnderscoreapp": {
+          "HttpApiIntegrationGetUnderscorepermissionUnderscoreurl": {
             "Type": "AWS::ApiGatewayV2::Integration",
             "Properties": {
               "ApiId": {
@@ -404,32 +424,32 @@
               },
               "IntegrationType": "AWS_PROXY",
               "IntegrationUri": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"InstallUnderscoreappLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetUnderscorepermissionUnderscoreurlLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
               },
               "PayloadFormatVersion": "2.0",
               "TimeoutInMillis": 6500
             }
           },
-          "HttpApiRouteGetInstall": {
+          "HttpApiRouteGetGetpermissionurl": {
             "Type": "AWS::ApiGatewayV2::Route",
             "Properties": {
               "ApiId": {
                 "Ref": "HttpApi"
               },
-              "RouteKey": "GET /install",
+              "RouteKey": "GET /get_permission_url",
               "Target": {
                 "Fn::Join": [
                   "/",
                   [
                     "integrations",
                     {
-                      "Ref": "HttpApiIntegrationInstallUnderscoreapp"
+                      "Ref": "HttpApiIntegrationGetUnderscorepermissionUnderscoreurl"
                     }
                   ]
                 ]
               }
             },
-            "DependsOn": "HttpApiIntegrationInstallUnderscoreapp"
+            "DependsOn": "HttpApiIntegrationGetUnderscorepermissionUnderscoreurl"
           },
           "AppUnderscoreinstalledLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
@@ -625,22 +645,22 @@
               "Ref": "ServerlessDeploymentBucket"
             }
           },
-          "AppUnderscoreinstalledLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "AppUnderscoreinstalledLambdaVersionWwLJvei5xZLLtiqPUD3n8ePHVkcc9YrOZbwjPs"
-            }
-          },
           "AppUnderscoreuninstalledLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AppUnderscoreuninstalledLambdaVersionZdZaBfKXAS0vwQPfJcf24c4aqwcl4Kss7K7ROELs7go"
+              "Ref": "AppUnderscoreuninstalledLambdaVersionTvVEugV3TWUVcwBvWPaaUVT0fVqgt8JerYGKpeRU"
             }
           },
-          "InstallUnderscoreappLambdaFunctionQualifiedArn": {
+          "AppUnderscoreinstalledLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "InstallUnderscoreappLambdaVersionVx9UvzdJ819b2MxlppKv495gZY9nQP2HNnr0hQPz8"
+              "Ref": "AppUnderscoreinstalledLambdaVersion5nhfMc9RDocaT8BmXIrmM53SpqnSEa1Xj7XQcUWLN5s"
+            }
+          },
+          "GetUnderscorepermissionUnderscoreurlLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetUnderscorepermissionUnderscoreurlLambdaVersiongTwUzU5TeIlWKutxafu4Vhuaf3XttJuTs8xy40fSxRc"
             }
           },
           "HttpApiId": {
@@ -792,25 +812,25 @@
     ],
     "pluginsData": {},
     "functions": {
-      "install_app": {
-        "handler": "backend/endpoints/install.install_app",
+      "get_permission_url": {
+        "handler": "backend/endpoints/install.get_permission_url",
         "events": [
           {
             "httpApi": {
-              "path": "/install",
+              "path": "/get_permission_url",
               "method": "GET"
             },
             "resolvedMethod": "GET",
-            "resolvedPath": "/install"
+            "resolvedPath": "/get_permission_url"
           }
         ],
-        "name": "ccg-dev-install_app",
+        "name": "ccg-dev-get_permission_url",
         "package": {},
         "memory": 1024,
         "timeout": 6,
         "runtime": "python3.8",
         "vpc": {},
-        "versionLogicalId": "InstallUnderscoreappLambdaVersionVx9UvzdJ819b2MxlppKv495gZY9nQP2HNnr0hQPz8"
+        "versionLogicalId": "GetUnderscorepermissionUnderscoreurlLambdaVersiongTwUzU5TeIlWKutxafu4Vhuaf3XttJuTs8xy40fSxRc"
       },
       "app_installed": {
         "handler": "backend/endpoints/install.app_installed",
@@ -830,7 +850,7 @@
         "timeout": 6,
         "runtime": "python3.8",
         "vpc": {},
-        "versionLogicalId": "AppUnderscoreinstalledLambdaVersionWwLJvei5xZLLtiqPUD3n8ePHVkcc9YrOZbwjPs"
+        "versionLogicalId": "AppUnderscoreinstalledLambdaVersion5nhfMc9RDocaT8BmXIrmM53SpqnSEa1Xj7XQcUWLN5s"
       },
       "app_uninstalled": {
         "handler": "backend/endpoints/install.app_uninstalled",
@@ -850,7 +870,7 @@
         "timeout": 6,
         "runtime": "python3.8",
         "vpc": {},
-        "versionLogicalId": "AppUnderscoreuninstalledLambdaVersionZdZaBfKXAS0vwQPfJcf24c4aqwcl4Kss7K7ROELs7go"
+        "versionLogicalId": "AppUnderscoreuninstalledLambdaVersionTvVEugV3TWUVcwBvWPaaUVT0fVqgt8JerYGKpeRU"
       }
     },
     "resources": {
@@ -945,7 +965,7 @@
           "**"
         ],
         "artifact": "/home/jwalz/Code/Personal/custom-cart-generator/.serverless/ccg.zip",
-        "artifactDirectoryName": "serverless/ccg/dev/1616468675753-2021-03-23T03:04:35.753Z"
+        "artifactDirectoryName": "serverless/ccg/dev/1616471084214-2021-03-23T03:44:44.214Z"
       },
       "provider": {
         "$ref": "$[\"service\"][\"provider\"]"
@@ -962,7 +982,7 @@
   },
   "package": {
     "individually": false,
-    "artifactDirectoryName": "serverless/ccg/dev/1616468675753-2021-03-23T03:04:35.753Z",
+    "artifactDirectoryName": "serverless/ccg/dev/1616471084214-2021-03-23T03:44:44.214Z",
     "artifact": "ccg.zip"
   }
 }

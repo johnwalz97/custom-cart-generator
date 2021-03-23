@@ -7,33 +7,34 @@ from backend.libs.helpers import create_shopify_session, lambda_http_handler
 from backend.shops import create_shop, get_shop, update_shop
 
 
-@lambda_http_handler(require_auth=True)
+@lambda_http_handler
 def app_installed(**kwargs):
-    shop_url = kwargs['shop']
-    shop_token = kwargs['token']
+    shopify_session = create_shopify_session(kwargs['shop'])
+    shopify.ShopifyResource.activate_session(shopify_session)
 
-    existing_shop = get_shop(shop_url)
+    access_token = shopify_session.request_token(kwargs)
+
+    existing_shop = get_shop(kwargs['shop'])
     if existing_shop:
-        update_shop({**existing_shop, 'token': shop_token})
+        update_shop({**existing_shop, 'token': access_token})
     else:
-        create_shop(shop_url, shop_token)
+        create_shop(kwargs['shop'], access_token)
 
-    session = create_shopify_session(shop_url, shop_token)
+    session = create_shopify_session(kwargs['shop'], access_token)
     shopify.ShopifyResource.activate_session(session)
 
-    webhook = shopify.Webhook()
-    webhook.topic = 'app/uninstalled'
-    webhook.address = 'https://customcartz.us/app_uninstalled'
-    webhook.format = 'json'
-    webhook.save()
+    # webhook = shopify.Webhook()
+    # webhook.topic = 'app/uninstalled'
+    # webhook.address = os.environ['APP_ENDPOINT'] + '/app_uninstalled'
+    # webhook.save()
 
-    return {'statusCode': 200}
+    redirect_url = 'http://localhost:5000/' if 'IS_OFFLINE' in os.environ else os.environ['APP_ENDPOINT']
+
+    return {'statusCode': 301, 'headers': {'Location': redirect_url}}
 
 
 @lambda_http_handler
-def get_permission_url(**kwargs):
-    shop_url = kwargs['shop']
-
+def get_permission_url(shop_url, **_):
     permission_scopes = [
         'write_products',
         'read_products',
@@ -46,6 +47,11 @@ def get_permission_url(**kwargs):
     ]
 
     shopify_session = create_shopify_session(shop_url)
-    permission_url = shopify_session.create_permission_url(permission_scopes, os.environ['APP_ENDPOINT'])
+
+    base_url = 'http://localhost:5001/dev' if 'IS_OFFLINE' in os.environ else os.environ['APP_ENDPOINT']
+    permission_url = shopify_session.create_permission_url(
+        permission_scopes,
+        base_url + '/app_installed',
+    )
 
     return {'statusCode': 200, 'body': json.dumps({'permission_url': permission_url})}
