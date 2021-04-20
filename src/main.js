@@ -1,16 +1,7 @@
+import HMR from '@roxi/routify/hmr';
+
 import App from './App.svelte';
 
-// ShopifyApp.init({
-//   apiKey: '{{ config.SHOPIFY_API_KEY }}',
-//   shopOrigin: 'https://{{ shop.shop }}',
-//   debug: true,
-// });
-// ShopifyApp.ready(function() {
-//   ShopifyApp.Bar.initialize({
-//     title: 'Custom Cart Generator - Select Products',
-//   });
-// });
+const app = HMR(App, { target: document.body }, 'custom-cart-generator');
 
-// window.top.location.href = '{{ permission_url }}';
-
-export const app = new App({ target: document.body });
+export default app;

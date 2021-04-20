@@ -5,12 +5,13 @@ from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
 
 if 'IS_OFFLINE' in os.environ:
-    DYNAMODB_CLIENT = boto3.client("dynamodb", endpoint='http://localhost:8000')
+    DYNAMODB_CLIENT = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
     os.environ['DYNAMODB_TABLE'] = 'ccg'
 else:
     DYNAMODB_CLIENT = boto3.client("dynamodb")
 
 DYNAMODB_RESERVED_WORDS = ["comment", "name", "status"]
+DYNAMODB_TABLE = os.environ["DYNAMODB_TABLE"]
 
 
 def _build_expression(query):
@@ -114,11 +115,11 @@ def _unmarshall_data(data):
 
 def delete_item(key):
     DYNAMODB_CLIENT.delete_item(
-        TableName=os.environ["DYNAMODB_TABLE"], Key=_marshall_data(key),
+        TableName=DYNAMODB_TABLE, Key=_marshall_data(key),
     )
 
 
-def get_item(query, index=None, query_filter=None, table=None):
+def get_item(query, index=None, query_filter=None):
     if index:
         res = get_many(query, index, query_filter=query_filter, table=table)
 
@@ -129,18 +130,18 @@ def get_item(query, index=None, query_filter=None, table=None):
 
     args = {
         "Key": _marshall_data(query),
-        "TableName": table or os.environ.get("DYNAMODB_TABLE"),
+        "TableName": os.environ.get("DYNAMODB_TABLE"),
     }
     response = DYNAMODB_CLIENT.get_item(**args)
 
     return _unmarshall_data(response["Item"])
 
 
-def get_many(query, index=None, query_filter=None, attributes=None, table=None):
+def get_many(query, index=None, query_filter=None, attributes=None):
     expression = _build_expression(query)
     expression_values = _build_expression_values(query)
     args = {
-        "TableName": table or os.environ.get("DYNAMODB_TABLE"),
+        "TableName": os.environ.get("DYNAMODB_TABLE"),
         "KeyConditionExpression": expression,
         "ExpressionAttributeValues": expression_values,
     }
@@ -187,9 +188,28 @@ def get_many(query, index=None, query_filter=None, attributes=None, table=None):
     return _unmarshall_data(data)
 
 
-def update_item(query, data, table=None):
+def scan(query_filter=None):
     args = {
-        "TableName": table or os.environ.get("DYNAMODB_TABLE"),
+        'TableName': DYNAMODB_TABLE,
+    }
+
+    if query_filter:
+        filter_expression = _build_expression(query_filter)
+        filter_values = _build_expression_values(query_filter)
+        args["FilterExpression"] = filter_expression
+        args["ExpressionAttributeValues"] = {
+            **args["ExpressionAttributeValues"],
+            **filter_values,
+        }
+
+    response = DYNAMODB_CLIENT.scan(**args)
+
+    return _unmarshall_data(response["Items"])
+
+
+def update_item(query, data):
+    args = {
+        "TableName": os.environ.get("DYNAMODB_TABLE"),
         "Key": _marshall_data(query),
         "UpdateExpression": _build_update_expression(data),
         "ExpressionAttributeValues": _build_update_expression_values(data),
@@ -205,7 +225,7 @@ def update_item(query, data, table=None):
 
 def write_item(data):
     DYNAMODB_CLIENT.put_item(
-        TableName=os.environ["DYNAMODB_TABLE"],
+        TableName=DYNAMODB_TABLE,
         Item=_marshall_data(data),
         ConditionExpression="attribute_not_exists(id)",
     )

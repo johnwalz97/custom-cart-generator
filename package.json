@@ -2,29 +2,52 @@
   "name": "custom_cart_generator",
   "version": "0.0.2",
   "private": true,
+  "@comments scripts": {
+    "dev": "develop with blazing fast rebuilds",
+    "deploy": "automatic backend and frontend deployment to lambda and s3",
+    "build": "build single page application (SPA)",
+    "nollup": "run the nollup no-bundler",
+    "routify": "run routify"
+  },
   "scripts": {
-    "build": "rollup -c",
+    "dev": "run-p routify nollup",
     "deploy": "./deploy.sh",
-    "dev": "rollup -c -w",
-    "start": "sirv public"
+    "build": "routify -b && rollup -c",
+    "nollup": "nollup -c",
+    "routify": "routify"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "rollup": "^2.3.4",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
+    "@mdi/js": "^5.9.55",
+    "@rollup/plugin-commonjs": "^15.0.0",
+    "@rollup/plugin-node-resolve": "^10.0.0",
+    "@roxi/routify": "^2.12.4",
+    "cross-env": "^7.0.2",
+    "dotenv": "^8.2.0",
+    "fs-extra": "^9.0.1",
+    "humps": "^2.0.1",
+    "lodash": "^4.17.21",
+    "nollup": "^0.13.13",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.2.6",
+    "postcss-import": "^13.0.0",
+    "rollup": "^2.33.1",
+    "rollup-plugin-hot": "^0.1.1",
+    "rollup-plugin-svelte": "^6.1.0",
+    "rollup-plugin-svelte-hot": "^0.11.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "sass": "^1.32.8",
     "serverless": "^2.30.3",
+    "serverless-dotenv-plugin": "^3.9.0",
     "serverless-dynamodb-local": "^0.2.39",
     "serverless-offline": "^6.8.0",
     "serverless-python-requirements": "^5.1.0",
     "serverless-stack-output": "^0.2.3",
-    "svelte": "^3.0.0",
-    "sveltestrap": "^3.13.0"
+    "svelte": "^3.29.4",
+    "svelte-materialify": "^0.3.5",
+    "svelte-preprocess": "^4.6.9",
+    "uuid": "^8.3.2"
   },
-  "dependencies": {
-    "sirv-cli": "^1.0.0"
+  "routify": {
+    "extensions": "svelte,html,svx,md"
   }
 }

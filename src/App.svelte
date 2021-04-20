@@ -1,7 +1,14 @@
 <script>
-  import ChooseProducts from 'components/ChooseProducts.svelte';
+  import { Router } from '@roxi/routify';
+  import { routes } from '../.routify/routes';
 
-  if (window.location.pathname === '/install') {}
+  import { MaterialApp } from 'svelte-materialify';
 </script>
 
-<ChooseProducts/>
+<style global>
+    @import "../assets/global.css";
+</style>
+
+<MaterialApp>
+  <Router {routes}/>
+</MaterialApp>
