@@ -4,7 +4,7 @@
 </script>
 
 <AppBar>
-  <span slot='title'>Custom Cart Generator</span>
+  <span slot='title'>1-Click</span>
   <div style='flex-grow:1'></div>
   <a class='text-decoration-none nav-link' href={$url('./templates')}>Cart Templates</a>
   <Menu closeOnClick={false} right>

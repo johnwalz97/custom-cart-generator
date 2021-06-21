@@ -1,0 +1,22 @@
+[
+  {
+    "resource_id": "bdaaf6c98dda47b6b715296647d02297",
+    "resource_type": "template",
+    "name": "Hello World Template",
+    "discount": "922424443073",
+    "products": [
+      {
+        "id": "6593962672321",
+        "variant_id": "39451454832833",
+        "quantity": 1.0
+      }
+    ]
+  },
+  {
+    "resource_id": "2c754c596bea427cb85a9122f3dd58f4",
+    "resource_type": "shop",
+    "name": "Test Store",
+    "uri": "awesome-test-fake-store.myshopify.com",
+    "access_token": "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"
+  }
+]

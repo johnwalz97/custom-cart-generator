@@ -1,14 +1,14 @@
-// const apiUri = 'https://8bg2fa9sl6.execute-api.us-east-1.amazonaws.com/dev';
-const apiUri = 'http://localhost:5001/dev';
+import { apiUrl } from './config';
 
-export const get = async (path) => {
-  const response = await fetch(apiUri + path, { mode: 'cors' });
+export const get = async (path, params) => {
+  const paramPath = params ? `?${Object.entries(params).map(([key, value]) => `${key}=${value}`).join('&')}` : '';
+  const response = await fetch(apiUrl + path + paramPath, { mode: 'cors' });
 
   return response.json();
 };
 
 export const post = async (path, data) => {
-  const response = await fetch(apiUri + path, {
+  const response = await fetch(apiUrl + path, {
     method: 'POST',
     mode: 'cors',
     headers: {

@@ -78,6 +78,7 @@
                 <ListItem on:click={() => rowsPerPage = 15}>15</ListItem>
                 <ListItem on:click={() => rowsPerPage = 30}>30</ListItem>
                 <ListItem on:click={() => rowsPerPage = 50}>50</ListItem>
+                <ListItem on:click={() => rowsPerPage = 100}>100</ListItem>
               </List>
             </Menu>
           </span>

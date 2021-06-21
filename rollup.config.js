@@ -12,7 +12,7 @@ import postcssImport from 'postcss-import';
 dotenv.config();
 
 const { distDir } = getConfig();
-const assetsDir = 'public';
+const assetsDir = 'assets';
 const buildDir = `${distDir}/build`;
 const isNollup = !!process.env.NOLLUP;
 const production = !process.env.ROLLUP_WATCH;
@@ -59,7 +59,7 @@ export default {
     !production && isNollup && Hmr({ inMemory: true, public: assetsDir }),
     {
       transform: code => {
-        code = code.replace(/process.env.NODE_ENV/g, `"${process.env.NODE_ENV}"`);
+        code = code.replace(/process.env.NODE_ENV/g, `"${process.env.NODE_ENV || 'dev'}"`);
         code = code.replace(/process.env.SHOPIFY_API_KEY/g, `"${process.env.SHOPIFY_API_KEY}"`);
         code = code.replace(/process.env.SHOPIFY_API_SECRET/g, `"${process.env.SHOPIFY_API_SECRET}"`);
 

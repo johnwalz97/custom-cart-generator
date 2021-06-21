@@ -1,6 +1,7 @@
 import { writable, get as getValue } from 'svelte/store';
 
 import { get, post } from '../api';
+import { shop } from '../config';
 
 export const templates = writable([]);
 
@@ -13,6 +14,6 @@ export const createTemplate = async newTemplate => {
 };
 
 (async () => {
-  const res = await get('/templates', {});
+  const res = await get('/templates', { shop });
   templates.set(res);
 })();

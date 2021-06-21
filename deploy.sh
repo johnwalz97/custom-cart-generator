@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 deploy() {
   local env=${1:-"dev"}
 
@@ -14,9 +16,9 @@ deploy() {
   # deploy Svelte frontend to S3
   echo "~~~ Deploying Svelte frontend to AWS S3"
   echo "~~~ Targeting public-read AWS S3 Bucket acl"
-  rm -rf public/build
+  rm -rf dist
   npm run build
-  aws s3 cp public s3://ccg-"$env"-frontend --recursive --cache-control max-age=0,no-cache,no-store,must-revalidate --acl public-read --profile personal
+  aws s3 cp dist s3://ccg-frontend --recursive --cache-control max-age=0,no-cache,no-store,must-revalidate --acl public-read --profile personal
   echo ""
 
   echo "~~~ Deployment complete"

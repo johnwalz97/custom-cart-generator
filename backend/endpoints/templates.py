@@ -1,5 +1,6 @@
-import json
 import uuid
+
+import simplejson as json
 
 from backend.config import DynamoIndexEnum, ResourceTypeEnum
 from backend.libs.aws_dynamodb import get_item, get_many, update_item, write_item

@@ -9,12 +9,18 @@ plugins:
 
 custom:
   dynamodb:
+    seed:
+      domain:
+        sources:
+          - table: ccg
+            sources: [ ./dev.seed.json ]
     stages:
       - dev
     start:
       port: 8000
       inMemory: false
       migrate: true
+      seed: true
   output:
     file: stack.yml
   pythonRequirements:
@@ -70,6 +76,24 @@ functions:
       - httpApi:
           path: /shops
           method: PATCH
+  get_products:
+    handler: backend/endpoints/products.get
+    events:
+      - httpApi:
+          path: /products
+          method: GET
+      - httpApi:
+          path: /products/{id}
+          method: GET
+  get_discounts:
+    handler: backend/endpoints/discounts.get
+    events:
+      - httpApi:
+          path: /discounts
+          method: GET
+      - httpApi:
+          path: /discounts/{id}
+          method: GET
   get_templates:
     handler: backend/endpoints/templates.get
     events:
@@ -99,38 +123,86 @@ resources:
           - AttributeName: resource_type
             AttributeType: S
         GlobalSecondaryIndexes:
-        - IndexName: resource_type
-          KeySchema:
-            - AttributeName: resource_type
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
+          - IndexName: resource_type
+            KeySchema:
+              - AttributeName: resource_type
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
         TableName: ${self:service}
-
     s3FrontendBucket:
       Type: AWS::S3::Bucket
       Properties:
         AccessControl: PublicRead
-        BucketName: ${self:service}-${self:provider.stage}-frontend
+        BucketName: ${self:service}-frontend
         LoggingConfiguration:
           DestinationBucketName: !Ref s3FrontendAccessLogsBucket
           LogFilePrefix: ${self:service}-access-logs
-        WebsiteConfiguration:
-          IndexDocument: index.html
-          ErrorDocument: index.html
     s3FrontendAccessLogsBucket:
       Type: AWS::S3::Bucket
       Properties:
         AccessControl: LogDeliveryWrite
-        BucketName: ${self:service}-${self:provider.stage}-frontend-access-logs
+        BucketName: ${self:service}-frontend-access-logs
+    cloudfrontFrontendDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Origins:
+            - DomainName: !Join
+                - ''
+                - - !Ref s3FrontendBucket
+                  - '.s3.amazonaws.com'
+              Id: ${self:service}-cloudfront-origin
+              S3OriginConfig:
+                OriginAccessIdentity: !Join
+                  - ''
+                  - - 'origin-access-identity/cloudfront/'
+                    - !Ref cloudfrontFrontendOriginAccessIdentity
+          Enabled: 'true'
+          Comment: CloudFront distribution for ${self:service} env
+          CustomErrorResponses:
+            - ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+            - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+          DefaultRootObject: index.html
+          DefaultCacheBehavior:
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            TargetOriginId: ${self:service}-cloudfront-origin
+            ForwardedValues:
+              QueryString: 'false'
+              Cookies:
+                Forward: none
+            ViewerProtocolPolicy: redirect-to-https
+          PriceClass: PriceClass_100
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: 'true'
+          HttpVersion: http2
+    cloudfrontFrontendOriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: 'CloudFront Origin Access Identity (OAI) for ${self:service}'
 
   Outputs:
     dynamodbTableName:
       Value: !Ref dynamodbTable
       Description: DynamoDB Table`
-    s3FrontendBucketWebsiteURL:
-      Value: !GetAtt [ s3FrontendBucket, WebsiteURL ]
-      Description: URL for the frontend website hosted on S3
-    s3FrontendAccessLogsBucketName:
-      Value: !Ref s3FrontendAccessLogsBucket
-      Description: Frontend access logs bucket name
+    cloudfrontFrontendDistributionName:
+      Value: !Ref cloudfrontFrontendDistribution
+      Description: CloudFront Distribution for ${self:service}
+    cloudfrontFrontendDistributionURL:
+      Value: !Join [ '', [ 'https://', !GetAtt [ cloudfrontFrontendDistribution, DomainName ] ] ]
+      Description: CloudFront URL for ${self:service}
+    cloudfrontFrontendOriginAccessIdentityName:
+      Value: !Ref cloudfrontFrontendOriginAccessIdentity
+      Description: CloudFront Origin Access Identity (OAI) for ${self:service}

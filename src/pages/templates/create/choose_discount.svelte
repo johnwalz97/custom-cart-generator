@@ -1,9 +1,9 @@
 <script>
   import { Checkbox } from 'svelte-materialify';
 
-  import { DataTable, rows } from '../../components/DataTable';
+  import { DataTable, rows } from '../../../components/DataTable';
 
-  import { discounts } from '../../data';
+  import { discounts } from '../../../stores/discounts';
 
   let selected = [];
 
@@ -14,7 +14,7 @@
   };
 </script>
 
-<DataTable settings={settings} data={discounts}>
+<DataTable settings={settings} data={$discounts}>
   <thead>
     <tr>
       <td>Discount Code</td>

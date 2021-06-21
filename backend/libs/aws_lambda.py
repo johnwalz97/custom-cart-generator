@@ -10,10 +10,12 @@ def http_handler(handler=None, require_auth=False):
     def wrapper(event, _):
         try:
             request_data = {}
-            if 'queryStringParameters' in event and event['queryStringParameters']:
-                request_data = event['queryStringParameters']
-            if 'body' in event and event['body']:
-                request_data = {**request_data, **json.loads(event['body'])}
+            if "queryStringParameters" in event and event["queryStringParameters"]:
+                request_data = event["queryStringParameters"]
+            if "pathParameters" in event and event["pathParameters"]:
+                request_data = {**request_data, **event["pathParameters"]}
+            if "body" in event and event["body"]:
+                request_data = {**request_data, **json.loads(event["body"])}
 
             handler_res = handler(request_data)
 

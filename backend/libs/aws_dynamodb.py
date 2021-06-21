@@ -121,7 +121,7 @@ def delete_item(key):
 
 def get_item(query, index=None, query_filter=None):
     if index:
-        res = get_many(query, index, query_filter=query_filter, table=table)
+        res = get_many(query, index, query_filter=query_filter)
 
         if len(res) > 0:
             return res[0]

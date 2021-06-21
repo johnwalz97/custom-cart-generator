@@ -2,6 +2,7 @@ import { writable } from 'svelte/store';
 import { v4 as uuid4 } from 'uuid';
 
 import { post } from '../api';
+import { shop } from '../config';
 
 const authScopes = Object.freeze([
   'write_products',
@@ -14,7 +15,7 @@ const authScopes = Object.freeze([
   'write_script_tags',
 ]);
 
-export const authToken = writable(localStorage.getItem('jwtToken'));
+export const authToken = writable(localStorage.getItem('access_token'));
 
 export const initiateAuth = async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -41,12 +42,12 @@ export const finishAuth = async () => {
 
   return await post('/shops', {
     access_token: res.access_token,
-    shop: urlParams.get('shop'),
+    uri: urlParams.get('shop'),
   });
 };
 
 authToken.subscribe(token => {
   if (token && token !== '') {
-    localStorage.setItem('jwtToken', token);
+    localStorage.setItem('access_token', token);
   }
 });
