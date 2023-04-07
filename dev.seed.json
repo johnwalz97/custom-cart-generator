@@ -17,6 +17,6 @@
     "resource_type": "shop",
     "name": "Test Store",
     "uri": "awesome-test-fake-store.myshopify.com",
-    "access_token": "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"
+    "access_token": "----"
   }
 ]
